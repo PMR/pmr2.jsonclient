@@ -93,3 +93,5 @@ Now call the method.
     ... })
     >>> self.portal.w.test_user_1_.cake
     <Workspace at /plone/w/test_user_1_/cake>
+    >>> self.portal.w.test_user_1_.cake.description
+    u'This is a very tasty cake for testing'
