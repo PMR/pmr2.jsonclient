@@ -14,9 +14,8 @@ class PMR2Client(object):
 
     dashboard = None
 
-    def __init__(self):
-        pass
-        # XXX to be customized.
+    def __init__(self, site):
+        self.setSite(site)
     
     def buildRequest(self, url, data=None, headers=None):
         base_headers = (
@@ -59,6 +58,7 @@ class PMR2Client(object):
 
     def setSite(self, site):
         self.site = site
+        self.updateDashboard()
 
     def setCredentials(self, basic=None, oauth=None):
         if oauth:
@@ -79,7 +79,7 @@ class PMR2Client(object):
             self.updateDashboard()
         return self.dashboard
 
-    def getMethod(self, name):
+    def getDashboardMethod(self, name):
         action = self.dashboard[name]
         # Can't have unicode.
         url = str(action['target'])
@@ -96,15 +96,28 @@ class PMR2Method(object):
         self._obj = obj
         self.url = url
 
+    def raw(self):
+        return self._obj
+
     def fields(self):
-        return self._obj['fields']
+        return self._obj.get('fields', {})
 
     def actions(self):
-        return self._obj['actions']
+        return self._obj.get('actions', {})
 
-    def call(self, action, fields):
+    def errors(self):
+        fields = self.fields()
+        errors = []
+        for name, field in fields.iteritems():
+            error = field.get('error', '')
+            if error:
+                errors.append((name, error))
+        return errors
+
+    def post(self, action, fields):
         data = {}
         data['actions'] = {action: '1'}
         data['fields'] = fields
         result = self.context.getResponse(self.url, data)
+        self.__init__(self.context, self.context.lasturl, result)
         return result

@@ -6,8 +6,7 @@ main client object.
 ::
 
     >>> from pmr2.jsonclient import PMR2Client
-    >>> client = PMR2Client()
-    >>> client.setSite(self.portal.absolute_url())
+    >>> client = PMR2Client(self.portal.absolute_url())
 
 Credentials
 -----------
@@ -53,6 +52,9 @@ the list of features for that particular instance of PMR2.
     [(u'label', u'Create personal workspace'),
     (u'target', u'http://nohost/plone/pmr2-dashboard/workspace-add')]
 
+The helper method `getDashboardMethod` provides a shortcut to work with
+the provided features.
+
 Workspace
 ---------
 
@@ -60,7 +62,7 @@ Currently the only method supported is the creation of workspaces. Fetch
 the description of the add workspace method.
 ::
 
-    >>> method = client.getMethod('workspace-add')
+    >>> method = client.getDashboardMethod('workspace-add')
     >>> print method.url
     http://nohost/plone/w/test_user_1_/+/addWorkspace
 
@@ -82,16 +84,65 @@ Then the actions.
     >>> actions['add']
     {u'title': u'Add'}
 
-Now call the method.
+Now execute the method using the add action.
 ::
 
-    >>> response = method.call(action='add', fields={
+    >>> response = method.post(action='add', fields={
     ...     'id': 'cake', 
     ...     'title': 'Tasty cake',
     ...     'description': 'This is a very tasty cake for testing',
     ...     'storage': 'dummy_storage',
     ... })
+
+The workspace object should have been created.
+::
+
     >>> self.portal.w.test_user_1_.cake
     <Workspace at /plone/w/test_user_1_/cake>
     >>> self.portal.w.test_user_1_.cake.description
     u'This is a very tasty cake for testing'
+
+The method object will also act as a pointer to the newly created item,
+and the response it gives can be retrieved like so.
+::
+
+    >>> method.url
+    'http://nohost/plone/w/test_user_1_/cake'
+    >>> raw = method.raw()
+    >>> raw['id']
+    u'cake'
+
+On the other hand, if there is an error, the method will return a list
+of errors.  Here we try to create the workspace using the same set of
+parameters.
+::
+
+    >>> method = client.getDashboardMethod('workspace-add')
+    >>> response = method.post(action='add', fields={
+    ...     'id': 'cake', 
+    ...     'title': 'Tasty cake',
+    ...     'description': 'This is a very tasty cake for testing',
+    ...     'storage': 'dummy_storage',
+    ... })
+
+Now we should have a list of errors.
+::
+
+    >>> method.errors()
+    [(u'id', u'The specified id is already in use.')]
+
+We should be able to reuse the same method as it should still reference
+the same url.
+::
+
+    >>> response = method.post(action='add', fields={
+    ...     'id': 'test', 
+    ...     'title': 'Tasty test',
+    ...     'description': 'This is a very tasty test for testing',
+    ...     'storage': 'dummy_storage',
+    ... })
+    >>> method.url
+    'http://nohost/plone/w/test_user_1_/test'
+    >>> raw = method.raw()
+    >>> raw['description']
+    u'This is a very tasty test for testing'
