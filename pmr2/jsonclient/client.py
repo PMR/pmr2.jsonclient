@@ -19,17 +19,21 @@ class PMR2Client(object):
         # XXX to be customized.
     
     def buildRequest(self, url, data=None, headers=None):
-        base_headers = {
-            'Authorization': self._auth, 
-            'Accept': self._accept,
-            'User-Agent': self._ua,
-        }
+        base_headers = (
+            ('Authorization', self._auth),
+            ('Accept', self._accept),
+            ('User-Agent', self._ua),
+        )
 
         all_headers = {}
         # Can't decide who to give precedence to.
         if headers:
             all_headers.update(headers)
-        all_headers.update(base_headers)
+
+        for k, v in base_headers:
+            if v:
+                # only add in headers with values set.
+                all_headers[k] = v
 
         if data and not isinstance(data, basestring):
             data = json.dumps(data)
@@ -62,7 +66,8 @@ class PMR2Client(object):
 
         login = basic.get('login', '')
         password = basic.get('password', '')
-        self._auth = 'Basic ' + ('%s:%s' % (login, password)).encode('base64')
+        self._auth = 'Basic ' + ('%s:%s' % 
+            (login, password)).encode('base64').strip()
 
     def updateDashboard(self):
         url = '%s/pmr2-dashboard' % self.site
