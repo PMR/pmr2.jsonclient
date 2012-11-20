@@ -74,8 +74,9 @@ List the fields.
     [u'description', u'id', u'storage', u'title']
     >>> print fields['description']['klass']
     textarea-widget text-field
-    >>> print [i['value'] for i in fields['storage']['items']]
-    [u'dummy_storage']
+    >>> storage = [i['value'] for i in fields['storage']['items']]
+    >>> u'dummy_storage' in storage
+    True
 
 Then the actions.
 ::
