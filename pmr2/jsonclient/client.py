@@ -7,7 +7,7 @@ class PMR2Client(object):
     _opener = urllib2.build_opener()
 
     site = None
-    _accept = 'application/vnd.physiome.pmr2.json.0'
+    _protocol = 'application/vnd.physiome.pmr2.json.0'
     _auth = ''
     _ua = 'PMR2Client/0.1'
     lasturl = None
@@ -20,7 +20,8 @@ class PMR2Client(object):
     def buildRequest(self, url, data=None, headers=None):
         base_headers = (
             ('Authorization', self._auth),
-            ('Accept', self._accept),
+            ('Accept', self._protocol),
+            ('Content-Type', self._protocol),
             ('User-Agent', self._ua),
         )
 
@@ -48,7 +49,7 @@ class PMR2Client(object):
         fp = self.open(request)
         self.lasturl = fp.geturl()
 
-        if fp.headers.get('Content-Type') != self._accept:
+        if fp.headers.get('Content-Type') != self._protocol:
             # some kind of error?
             raise ValueError('Content-Type mismatch')
 
