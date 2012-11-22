@@ -26,16 +26,15 @@ implemented).
 ::
 
     >>> from oauth2 import Consumer, Token
-    >>> consumer = Consumer('consumer.example.com', 'consumer-secret')
+    >>> consumer = self.consumer
     >>> token = Token('pmr2token', 'token-secret')
     >>> client.setCredentials(oauth=dict(
     ...     consumer=consumer,
     ...     token=token,
     ... ))
-    Traceback (most recent call last):
-    ...
-    NotImplementedError: ...
-    ...
+
+Should test for the whole process using the client helper classes, and
+have the service provide a way to check for user name.
 
 Dashboard
 ---------
