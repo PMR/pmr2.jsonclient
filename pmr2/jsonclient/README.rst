@@ -25,13 +25,7 @@ Alternatively, OAuth authentication credentials (will be available once
 implemented).
 ::
 
-    >>> from oauth2 import Consumer, Token
-    >>> consumer = self.consumer
-    >>> token = Token('pmr2token', 'token-secret')
-    >>> client.setCredentials(oauth=dict(
-    ...     consumer=consumer,
-    ...     token=token,
-    ... ))
+    >>> import oauthlib
 
 Should test for the whole process using the client helper classes, and
 have the service provide a way to check for user name.

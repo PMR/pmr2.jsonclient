@@ -25,6 +25,7 @@ setup(name='pmr2.jsonclient',
       install_requires=[
           'setuptools',
           # -*- Extra requirements: -*-
+          'oauthlib',
       ],
       entry_points="""
       # -*- Entry points: -*-

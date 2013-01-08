@@ -1,7 +1,7 @@
 import json
 import urllib2
 
-import oauth2 as oauth
+import oauthlib
 
 _protocol = 'application/vnd.physiome.pmr2.json.0'
 _ua = 'PMR2Client/0.1'
@@ -37,7 +37,6 @@ class PMR2Client(object):
 
     def __init__(self, site):
         self.setSite(site)
-        self.oauth_signature_method = oauth.SignatureMethod_HMAC_SHA1()
     
     def buildRequest(self, url, data=None, headers=None):
 
