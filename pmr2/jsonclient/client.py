@@ -35,8 +35,10 @@ class PMR2Client(object):
 
     dashboard = None
 
-    def __init__(self, site):
-        self.setSite(site)
+    def __init__(self, site, credential=None):
+        self.site = site
+        self.credential = credential
+        self.updateDashboard()
     
     def buildRequest(self, url, data=None, headers=None):
 
@@ -47,69 +49,12 @@ class PMR2Client(object):
             headers = {}
         request = urllib2.Request(url, data=data, headers=headers)
 
-        if data:
-            # we will need to override this.
-            request.add_header('Content-Type', _protocol)
-
-        # It may be impossible to generate an auth string, so any
-        # Authorization header specified will override this.
-        if not headers and not (headers and 'Authorization' in headers):
-            auth = self.getAuthorization(request.get_method(), url)
-            if auth:
-                request.add_header('Authorization', auth)
+        if self.credential:
+            self.credential.apply(request)
 
         return request
 
-    def getAuthorization(self, method, url):
-        if self._auth is not None:
-            # Assume basic auth
-            return self._auth
-
-        if not self.token:
-            return None
-
-        auth = self.buildOAuthHeaders(method, url, self.consumer, self.token)
-        return auth.get('Authorization', None)
-
-    def buildOAuthHeaders(self, method, url, consumer, token, parameters=None):
-        # not using shortcuts because the method casts all string types
-        # stupidly and needlessly into unicode type.
-        # oreq = oauth.Request.from_consumer_and_token(
-        #     consumer, token, http_url=url, parameters=parameters)
-
-        # do this the long way.
-        oreq = oauth.Request()
-        oreq.url = url
-        oreq.method = method
-
-        defaults = {
-            'oauth_timestamp': oauth.Request.make_timestamp(),
-            'oauth_nonce': oauth.Request.make_nonce(),
-            'oauth_version': oauth.Request.version,
-        }
-
-        if parameters:
-            defaults.update(parameters)
-
-        defaults['oauth_consumer_key'] = consumer.key
-        if token:
-            defaults['oauth_token'] = token.key
-            if token.verifier:
-                defaults['oauth_verifier'] = token.verifier
-
-        oreq.is_form_encoded = True  # disables outdated spec.
-        oreq.update(defaults)
-        self._kb1 = self.oauth_signature_method.signing_base(oreq, consumer, token)
-        oreq.sign_request(self.oauth_signature_method, consumer, token)
-        self._kb2 = self.oauth_signature_method.signing_base(oreq, consumer, token)
-        headers = oreq.to_header()
-        return headers
-
     def open(self, request, trail=None):
-        # since the request is not OAuth aware, the Authorization header
-        # will not be regenerated new URI, resulting in an invalid
-        # signature.  Thus we do it here until an appropriate request 
-        # class is provided.
         url = request.get_full_url()
         if trail is None:
             trail = []
@@ -142,22 +87,9 @@ class PMR2Client(object):
         self.site = site
         self.updateDashboard()
 
-    def setCredentials(self, basic=None, oauth=None):
-        if oauth:
-            self.consumer = oauth.get('consumer', None)
-            self.token = oauth.get('token', None)
-
-            if not self.consumer:
-                raise ValueError('missing OAuth consumer')
-
-            self._auth = None
-            return
-
-        login = basic.get('login', '')
-        password = basic.get('password', '')
-        if login or password:
-            self._auth = 'Basic ' + ('%s:%s' % 
-                (login, password)).encode('base64').strip()
+    def setCredential(self, credential):
+        self.credential = credential
+        self.updateDashboard()
 
     def updateDashboard(self):
         url = '%s/pmr2-dashboard' % self.site
