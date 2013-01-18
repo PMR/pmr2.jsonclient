@@ -86,10 +86,13 @@ class PMR2Client(object):
         self.site = site
         self.updateDashboard()
 
-    def setCredential(self, credential):
+    def setCredential(self, credential, update=False):
+        # XXX figure out some way to do the update smartly, such as test
+        # whether the credentials are ready to be used.
         self.credential = credential
         self.credential.setPMR2Client(self)
-        self.updateDashboard()
+        if update:
+            self.updateDashboard()
 
     def updateDashboard(self):
         url = '%s/pmr2-dashboard' % self.site

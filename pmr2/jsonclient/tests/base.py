@@ -8,6 +8,7 @@ from Products.PloneTestCase import PloneTestCase as ptc
 from Products.PloneTestCase.layer import onsetup
 from Products.PloneTestCase.layer import onteardown
 from Testing.testbrowser import PublisherHTTPHandler
+from Testing.testbrowser import Browser
 
 from pmr2.jsonclient.client import PMR2Client, build_opener
 
@@ -37,7 +38,7 @@ class JsonClientTestCase(WorkspaceDocTestCase):
         super(JsonClientTestCase, self).afterSetUp()
         request = TestRequest()
 
-        from Products.PloneTestCase.setup import default_user
+        from Products.PloneTestCase.setup import default_user, default_password
         from pmr2.oauth.interfaces import IConsumerManager, ITokenManager
         from pmr2.oauth.interfaces import IScopeManager
         from pmr2.oauth.consumer import Consumer
@@ -64,3 +65,19 @@ class JsonClientTestCase(WorkspaceDocTestCase):
         sm = zope.component.getMultiAdapter((self.portal, request),
             IScopeManager)
         sm.permitted = '^.*$'  # permit everything.
+
+        b = Browser()
+        portal_url = self.portal.absolute_url()
+        b.open(portal_url + '/login')
+        b.getControl(name='__ac_name').value = default_user
+        b.getControl(name='__ac_password').value = default_password
+        b.getControl(name='submit').click()
+        self.user_browser = b
+
+    def userSubmitVerifier(self, key):
+        from pmr2.oauth.interfaces import ITokenManager
+        request = TestRequest()
+        tm = zope.component.getMultiAdapter((self.portal, request), 
+            ITokenManager)
+        token = tm.getRequestToken(key)
+        return token.verifier
