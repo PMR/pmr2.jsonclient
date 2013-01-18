@@ -1,4 +1,6 @@
-import oauthlib
+import urlparse
+
+from oauthlib.oauth1 import Client
 
 
 class Credential(object):
@@ -6,6 +8,8 @@ class Credential(object):
     Credential to access a site.  Ideally this should all integrate
     somehow with urllib2.
     """
+
+    pmr2_client = None
 
     def getAuthorization(self, request):
         """
@@ -19,6 +23,9 @@ class Credential(object):
         auth = self.getAuthorization(request)
         if auth:
             request.add_header('Authorization', auth)
+
+    def setPMR2Client(self, pmr2_client):
+        self.pmr2_client = pmr2_client
 
 
 class BasicCredential(Credential):
@@ -34,9 +41,13 @@ class BasicCredential(Credential):
 
 class OAuthCredential(Credential):
 
+    REQUEST_TOKEN = 'OAuthRequestToken'
+    AUTHORIZE_TOKEN = 'OAuthAuthorizeToken'
+    GET_ACCESS_TOKEN = 'OAuthGetAccessToken'
+
     def __init__(self, client_key, access_key):
         self.client_key = client_key
         self.access_key = access_key
 
-    def getAuthorization(self, method, url):
-        raise NotImplementedError()
+    def getAuthorization(self, *a, **kw):
+        pass

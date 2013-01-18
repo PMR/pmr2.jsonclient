@@ -6,10 +6,6 @@ import oauthlib
 _protocol = 'application/vnd.physiome.pmr2.json.0'
 _ua = 'PMR2Client/0.1'
 
-REQUEST_TOKEN = 'OAuthRequestToken'
-AUTHORIZE_TOKEN = 'OAuthAuthorizeToken'
-GET_ACCESS_TOKEN = 'OAuthGetAccessToken'
-
 
 def build_opener(*handlers):
     result = urllib2.build_opener(*handlers)
@@ -38,6 +34,7 @@ class PMR2Client(object):
     def __init__(self, site, credential=None):
         self.site = site
         self.credential = credential
+        self.mismatched_content = None
         self.updateDashboard()
     
     def buildRequest(self, url, data=None, headers=None):
@@ -77,6 +74,8 @@ class PMR2Client(object):
 
         if fp.headers.get('Content-Type') != _protocol:
             # some kind of error?
+            self.mismatched_content = fp.read()
+            fp.close()
             raise ValueError('Content-Type mismatch')
 
         result = json.load(fp)
@@ -89,6 +88,7 @@ class PMR2Client(object):
 
     def setCredential(self, credential):
         self.credential = credential
+        self.credential.setPMR2Client(self)
         self.updateDashboard()
 
     def updateDashboard(self):

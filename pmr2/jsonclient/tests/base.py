@@ -44,7 +44,8 @@ class JsonClientTestCase(WorkspaceDocTestCase):
         from pmr2.oauth.token import Token
 
         # assuming none of these are overridden.
-        self.consumer = Consumer('test.example.com', 'consumer-secret')
+        self.consumer = Consumer('test.example.com', 'consumer-secret',
+            u'PMR2 Test JSON Client', None)
         cm = zope.component.getMultiAdapter((self.portal, request),
             IConsumerManager)
         cm.add(self.consumer)

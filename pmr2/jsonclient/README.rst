@@ -8,27 +8,6 @@ main client object::
     >>> from pmr2.jsonclient import PMR2Client
     >>> client = PMR2Client(self.portal.absolute_url())
 
-Credentials
------------
-
-Add your basic authentication credentials (i.e. login/password).  This
-is not recommended for use within a typical client due to the security
-issue of sharing of passwords::
-
-    >>> from Products.PloneTestCase.setup import default_user, default_password
-    >>> client.setCredential(credential.BasicCredential(
-    ...     username=default_user,
-    ...     password=default_password
-    ... ))
-
-Alternatively, OAuth authentication credentials (will be available once
-implemented)::
-
-    >>> import oauthlib
-
-Should test for the whole process using the client helper classes, and
-have the service provide a way to check for user name.
-
 Dashboard
 ---------
 
@@ -43,8 +22,52 @@ the list of features for that particular instance of PMR2::
     [(u'label', u'Create personal workspace'),
     (u'target', u'http://nohost/plone/pmr2-dashboard/workspace-add')]
 
-The helper method `getDashboardMethod` provides a shortcut to work with
-the provided features.
+The helper method ``getDashboardMethod`` on one of the keys will
+retrieve the description and construct the method wrapper class which is
+used to interact with the associated PMR2 instance.  Let's try to add
+a workspace::
+
+    >>> method = client.getDashboardMethod('workspace-add')
+    Traceback (most recent call last):
+    ...
+    ValueError: Content-Type mismatch
+
+Looks like there are some problems.  The PMR2 jsonclient communicates
+with the server using a custom mimetype, and if there are no errors PMR2
+will return the content with the same mimetype set.  Sometimes problems
+may occur and this is the result, and to aid debugging, the attribute
+``mismatched_content`` will be set::
+
+    >>> print client.mismatched_content
+    <BLANKLINE>
+    ...
+    <label for="__ac_name">Login Name</label>
+    <input type="text" size="15" name="__ac_name" value="" id="__ac_name" />
+    ...
+
+It appears the client has been redirected to a login page, as some form
+of credentials must be provided to permit the adding of workspaces.
+
+Basic Credentials
+-----------------
+
+Under normal circumstances, adding content to PMR2 requires some form of
+credentials, and almost always they will come in the form of user name
+and passwords.  This can be done like so::
+
+    >>> from Products.PloneTestCase.setup import default_user, default_password
+    >>> client.setCredential(credential.BasicCredential(
+    ...     username=default_user,
+    ...     password=default_password
+    ... ))
+
+However, if PMR2 functionality are to be used by third-parties on behalf
+of its users, sharing of passwords poses certain security hazards, and
+so for this use case OAuth must be used.  This requires a whole separate
+workflow which will be documented later.
+
+Again, ``BasicCredential`` is NOT the recommended method to use by
+third-party applications to access a user's content on PMR2.
 
 Workspace
 ---------
