@@ -12,8 +12,10 @@ Dashboard
 ---------
 
 The dashboard is the first thing the client should see, as it returns
-the list of features for that particular instance of PMR2::
+the list of features for that particular instance of PMR2.  Have to call
+the update method before it can be used::
 
+    >>> result = client.updateDashboard()
     >>> result = client.getDashboard()
     >>> sorted(result['workspace-home'].items())
     [(u'label', u'List personal workspaces'),
@@ -215,7 +217,7 @@ had just approved the token.  Since OAuth credentials are provided, the
 verification process should trigger on the temporary token and then fail
 the request with an HTTP 403, rather than a redirect to the login page::
 
-    >>> method = client.getDashboardMethod('workspace-add')
+    >>> result = client.updateDashboard()
     Traceback (most recent call last):
     ...
     HTTPError: HTTP Error 403: Forbidden
@@ -233,6 +235,7 @@ Now with the verifier, it is now possible to acquire the access token::
 Then see if the access credentials are correctly assigned by trying to
 retrieve the workspace-add method::
 
+    >>> result = client.updateDashboard()
     >>> method = client.getDashboardMethod('workspace-add')
     >>> print method.url
     http://nohost/plone/w/test_user_1_/+/addWorkspace

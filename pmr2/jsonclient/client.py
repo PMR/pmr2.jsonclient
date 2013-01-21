@@ -35,7 +35,6 @@ class PMR2Client(object):
         self.site = site
         self.credential = credential
         self.mismatched_content = None
-        self.updateDashboard()
     
     def buildRequest(self, url, data=None, headers=None):
 
