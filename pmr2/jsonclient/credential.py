@@ -135,6 +135,10 @@ class OAuthCredential(Credential):
         d = urlparse.parse_qs(rawstr)
         self.key = d.get('oauth_token', ['']).pop()
         self.secret = d.get('oauth_token_secret', ['']).pop()
+        # do NOT include a verifier with a normal acces request as this
+        # is an undefined behavior.  Will fail in the case of pmr2.oauth
+        # as oauthlib will verify this if this value is supplied.
+        self.verifier = None
 
     def getOwnerAuthorizationUrl(self):
         """

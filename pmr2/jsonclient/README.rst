@@ -211,12 +211,14 @@ Users opens the target url::
     >>> self.user_browser.getControl(name="form.buttons.approve").click()
 
 Naturally, temporary credentials cannot do anything, even if the user
-had just approved the token::
+had just approved the token.  Since OAuth credentials are provided, the
+verification process should trigger on the temporary token and then fail
+the request with an HTTP 403, rather than a redirect to the login page::
 
     >>> method = client.getDashboardMethod('workspace-add')
     Traceback (most recent call last):
     ...
-    ValueError: Content-Type mismatch
+    HTTPError: HTTP Error 403: Forbidden
 
 The user approved the token on the PMR2 instance, and then helpfully
 submits the verifier on that page.  For ease of demonstration, this
