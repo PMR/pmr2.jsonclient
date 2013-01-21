@@ -1,6 +1,6 @@
+import json
 import os.path
 import time
-import ConfigParser
 import urllib2
 import readline
 import traceback
@@ -25,7 +25,7 @@ class PMR2Cli(object):
     token_key = ''
     token_secret = ''
     active = False
-    debug = False
+    debug = 0
 
     def __init__(self, 
             pmr2root=PMR2ROOT,
@@ -37,33 +37,36 @@ class PMR2Cli(object):
         self.client = PMR2Client(pmr2root)
         self.client.setCredential(self.credential)
 
+    def build_config(self):
+        return  {
+            'token_key': self.credential.key,
+            'token_secret': self.credential.secret,
+            'debug': self.debug,
+        }
+
     def load_config(self, filename=CONFIG_FILENAME):
-        config = ConfigParser.SafeConfigParser({
-                'token_key': '',
-                'token_secret': '',
-                'debug': False,
-            },
-            allow_no_value=True,
-        )
-        config.read(filename)
         try:
-            self.credential.key = config.get('main', 'token_key')
-            self.credential.secret = config.get('main', 'token_secret')
-            self.debug = config.getboolean('main', 'debug')
-        except:
-            # I don't care, I am not trapping each of the above in its
-            # own exception for even just a missing value.
-            print "Error reading configuration, rewriting."
-            self.save_config()
+            fd = open(filename, 'r')
+            config = json.load(fd)
+            fd.close()
+        except IOError:
+            print "Fail to open configuration file."
+            config = self.build_config()
+        except ValueError:
+            print "Fail to decode JSON configuration.  Using default values."
+            config = self.build_config()
+
+        self.credential.key = config.get('token_key', '')
+        self.credential.secret = config.get('token_secret', '')
+        self.debug = config.get('debug', 0)
 
     def save_config(self, filename=CONFIG_FILENAME):
-        config = ConfigParser.ConfigParser()
-        config.add_section('main')
-        config.set('main', 'token_key', self.credential.key)
-        config.set('main', 'token_secret', self.credential.secret)
-        config.set('main', 'debug', self.debug)
-        with open(filename, 'wb') as configfile:
-            config.write(configfile)
+        try:
+            fd = open(filename, 'wb')
+            json.dump(self.build_config(), fd)
+            fd.close()
+        except IOError:
+            print "Error saving configuration"
 
     def get_access(self):
         # get user to generate one.
@@ -141,10 +144,7 @@ class PMR2Cli(object):
                     import pdb;pdb.post_mortem()
 
     def run(self):
-        try:
-            self.load_config()
-        except ConfigParser.NoSectionError:
-            pass
+        self.load_config()
 
         client = PMR2Client(PMR2ROOT)
         if not self.credential.key and not self.credential.secret:
