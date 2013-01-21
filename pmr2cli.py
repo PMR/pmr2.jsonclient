@@ -14,7 +14,7 @@ from pmr2.jsonclient import PMR2Client, OAuthCredential
 PMR2ROOT = 'http://localhost:8280/pmr'
 CONSUMER_KEY = 'XeGlniKGlGGYRyoChwygbgYC'
 CONSUMER_SECRET = '55yxsmcV124kSsJInMhtsJl7'
-DEFAULT_SCOPE = 'http://localhost:8280/pmr/scope/workspace_all'
+DEFAULT_SCOPE = 'http://localhost:8280/pmr/scope/workspace_full'
 
 HOME = os.path.expanduser('~')
 CONFIG_FILENAME = os.path.join(HOME, '.pmr2clirc')
@@ -25,6 +25,7 @@ class PMR2Cli(object):
     token_key = ''
     token_secret = ''
     active = False
+    scope = DEFAULT_SCOPE
     debug = 0
 
     def __init__(self, 
@@ -42,6 +43,7 @@ class PMR2Cli(object):
             'token_key': self.credential.key,
             'token_secret': self.credential.secret,
             'debug': self.debug,
+            'scope': DEFAULT_SCOPE,
         }
 
     def load_config(self, filename=CONFIG_FILENAME):
@@ -59,6 +61,7 @@ class PMR2Cli(object):
         self.credential.key = config.get('token_key', '')
         self.credential.secret = config.get('token_secret', '')
         self.debug = config.get('debug', 0)
+        self.scope = config.get('scope', DEFAULT_SCOPE)
 
     def save_config(self, filename=CONFIG_FILENAME):
         try:
@@ -70,11 +73,17 @@ class PMR2Cli(object):
 
     def get_access(self):
         # get user to generate one.
-        self.credential.getTemporaryCredential(callback='oob')
+        scope = self.scope
+        try:
+            self.credential.getTemporaryCredential(callback='oob', scope=scope)
+        except urllib2.HTTPError, e:
+            print 'Fail to request temporary credentials.'
+            return
         target = self.credential.getOwnerAuthorizationUrl()
         webbrowser.open(target)
         verifier = raw_input('Please enter the verifier: ')
         self.credential.getAccessCredential(verifier=verifier)
+        return True
 
     def do_help(self, *a):
         """
@@ -147,13 +156,17 @@ class PMR2Cli(object):
         self.load_config()
 
         client = PMR2Client(PMR2ROOT)
+        access = False
         if not self.credential.key and not self.credential.secret:
             try:
-                self.get_access()
+                access = self.get_access()
             except urllib2.HTTPError, e:
                 print 'Fail to validate the verifier.'
-                return
-            self.save_config()
+
+        if not access:
+            return
+
+        self.save_config()
 
         try:
             self.client.updateDashboard()

@@ -93,7 +93,7 @@ class OAuthCredential(Credential):
         uri, headers, body = client.sign(url, method)
         return headers['Authorization']
 
-    def getTemporaryCredential(self, callback=None):
+    def getTemporaryCredential(self, callback=None, scope=None):
         if self.pmr2_client is None:
             raise ValueError('This PMR2 OAuth credential must be associated '
                 'with a PMR2 instance before temporary credentials can be '
@@ -102,6 +102,9 @@ class OAuthCredential(Credential):
         # Only clear access for temporary
         self.clearAccess()
         url = '%s/%s' % (self.pmr2_client.site, self.REQUEST_TOKEN)
+        if scope:
+            # it is better use an url builder of sort.
+            url = '%s?scope=%s' % (url, scope)
 
         self.verifier = None
         if callback:
