@@ -162,6 +162,8 @@ class PMR2Cli(object):
                 access = self.get_access()
             except urllib2.HTTPError, e:
                 print 'Fail to validate the verifier.'
+        else:
+            access = True
 
         if not access:
             return
