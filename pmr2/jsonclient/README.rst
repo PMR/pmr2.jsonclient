@@ -171,6 +171,8 @@ support) only provides support for the draft specification for OAuth
 available, OAuth 1.0 will remain the only viable option for the mean
 time.
 
+.. _`RFC6749`: http://tools.ietf.org/html/rfc6749
+
 For demonstration, a few assumptions and shortcuts will be taken and
 shown.  The first one is that a client (consumer) key must be provided
 by the PMR2 administrator to the client.  In this demonstration, first
