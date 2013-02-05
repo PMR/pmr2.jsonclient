@@ -1,5 +1,6 @@
 import json
 import os.path
+import code
 import time
 import urllib2
 import readline
@@ -29,7 +30,8 @@ class PMR2Cli(object):
     token_secret = ''
     active = False
     scope = DEFAULT_SCOPE
-    debug = 0
+    method = None
+    _debug = 0
 
     def __init__(self, 
             pmr2root=PMR2ROOT,
@@ -40,6 +42,21 @@ class PMR2Cli(object):
             client=(consumer_key, consumer_secret))
         self.client = PMR2Client(pmr2root)
         self.client.setCredential(self.credential)
+
+    @property
+    def debug(self):
+        return self._debug
+
+    @debug.setter
+    def debug(self, value):
+        if isinstance(value, int):
+            self._debug = value
+
+        if isinstance(value, basestring):
+            if value.lower() in ('false', 'no', '0',):
+                self._debug = 0
+            else:
+                self._debug = 1
 
     def build_config(self):
         return  {
@@ -104,13 +121,27 @@ class PMR2Cli(object):
             print name[3:]
             print obj.__doc__
 
+    def do_console(self, *a):
+        """
+        Start the interactive python console.
+        """
+
+        console = code.InteractiveConsole(locals=locals())
+        result = console.interact('')
+
     def do_dashboard(self, *a):
         """
         List out the features available on the dashboard.
         """
 
-        for i in self.client.getDashboard():
-            print '"%s"\t%s' % (i['label'], i['target'])
+        dashboard = self.client.getDashboard()
+        if not a:
+            for k, v in dashboard.items():
+                print '%s\t%s\t%s' % (k, v['label'], v['target'])
+            return
+
+        self.method = self.client.getDashboardMethod(a[0])
+        print 'Acquired method "%s"; use console to interact.' % a[0]
 
     def do_list_workspace(self, *a):
         """
@@ -132,7 +163,7 @@ class PMR2Cli(object):
     def shell(self):
         while self.active:
             try:
-                raw = raw_input('> ')
+                raw = raw_input('pmr2cli> ')
                 if not raw:
                     continue
                 rawargs = raw.split()
