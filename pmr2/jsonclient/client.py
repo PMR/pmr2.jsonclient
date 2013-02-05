@@ -124,10 +124,14 @@ class PMR2Method(object):
         return self._obj
 
     def fields(self):
-        return self._obj.get('fields', {})
+        if isinstance(self._obj, dict):
+            return self._obj.get('fields', {})
+        return {}
 
     def actions(self):
-        return self._obj.get('actions', {})
+        if isinstance(self._obj, dict):
+            return self._obj.get('actions', {})
+        return {}
 
     def errors(self):
         fields = self.fields()
