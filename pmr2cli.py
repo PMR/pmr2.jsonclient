@@ -160,6 +160,30 @@ class PMR2Cli(object):
 
         print self.client.getResponse(''.join(a))
 
+    def do_property(self, *a):
+        """
+        Set property for this object.
+        """
+
+        permitted = ['debug']
+
+        if len(a) < 1:
+            print "need both key and values."
+            return
+
+        args = list(a)
+        prop = args.pop(0)
+
+        if len(a) < 2:
+            print '%s = %s' % (prop, getattr(self, prop))
+            return
+
+        if prop not in permitted:
+            print "'%s' cannot be set" % prop
+            return
+
+        setattr(self, prop, ' '.join(args))
+
     def shell(self):
         while self.active:
             try:
