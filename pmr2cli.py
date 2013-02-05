@@ -14,7 +14,10 @@ from pmr2.jsonclient import PMR2Client, OAuthCredential
 PMR2ROOT = 'http://localhost:8280/pmr'
 CONSUMER_KEY = 'XeGlniKGlGGYRyoChwygbgYC'
 CONSUMER_SECRET = '55yxsmcV124kSsJInMhtsJl7'
-DEFAULT_SCOPE = 'http://localhost:8280/pmr/scope/workspace_full'
+DEFAULT_SCOPE = (
+    'http://localhost:8280/pmr/scope/workspace_full,'
+    'http://localhost:8280/pmr/scope/collection'
+)
 
 HOME = os.path.expanduser('~')
 CONFIG_FILENAME = os.path.join(HOME, '.pmr2clirc')
@@ -157,7 +160,7 @@ class PMR2Cli(object):
 
         client = PMR2Client(PMR2ROOT)
         access = False
-        if not self.credential.key and not self.credential.secret:
+        if not self.credential.hasAccess():
             try:
                 access = self.get_access()
             except urllib2.HTTPError, e:

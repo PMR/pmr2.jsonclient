@@ -34,6 +34,9 @@ class Credential(object):
     def setPMR2Client(self, pmr2_client):
         self.pmr2_client = pmr2_client
 
+    def hasAccess(self):
+        return False
+
 
 class BasicCredential(Credential):
 
@@ -44,6 +47,9 @@ class BasicCredential(Credential):
     def getAuthorization(self, request):
         return 'Basic ' + ('%s:%s' %
             (self.username, self.password)).encode('base64').strip()
+
+    def hasAccess(self):
+        return not (self.username is None or self.password is None)
 
 
 class OAuthCredential(Credential):
@@ -73,6 +79,9 @@ class OAuthCredential(Credential):
 
         self.callback = callback
         self.verifier = verifier
+
+    def hasAccess(self):
+        return not (self.key is None or self.secret is None)
 
     def clearAccess(self):
         self.key, self.secret = None, None
