@@ -3,6 +3,7 @@ import os.path
 import code
 import time
 import urllib2
+from urllib import quote_plus
 import readline
 import traceback
 import webbrowser
@@ -15,9 +16,10 @@ from pmr2.jsonclient import PMR2Client, OAuthCredential
 PMR2ROOT = 'http://localhost:8280/pmr'
 CONSUMER_KEY = 'XeGlniKGlGGYRyoChwygbgYC'
 CONSUMER_SECRET = '55yxsmcV124kSsJInMhtsJl7'
-DEFAULT_SCOPE = (
-    'http://localhost:8280/pmr/scope/workspace_full,'
-    'http://localhost:8280/pmr/scope/collection'
+DEFAULT_SCOPE = quote_plus(
+    'http://localhost:8280/pmr/scope/collection,'
+    'http://localhost:8280/pmr/scope/search,'
+    'http://localhost:8280/pmr/scope/workspace_full'
 )
 
 HOME = os.path.expanduser('~')
@@ -224,21 +226,22 @@ class PMR2Cli(object):
             access = True
 
         if not access:
+            self.save_config()
             return
-
-        self.save_config()
 
         try:
             self.client.updateDashboard()
         except urllib2.HTTPError, e:
             print 'Credentials are invalid and are purged.  Quitting'
-            self.credential.key = ''
-            self.credential.secret = ''
+            self.credential.key = None
+            self.credential.secret = None
+            self.scope = DEFAULT_SCOPE
             self.save_config()
             return
 
         self.active = True
         print 'Starting PMR2 Demo Shell...'
+        self.save_config()
         self.shell()
 
     def test(self):
