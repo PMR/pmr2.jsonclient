@@ -107,6 +107,9 @@ class PMR2Client(object):
         action = self.dashboard[name]
         # Can't have unicode.
         url = str(action['target'])
+        return self.getMethod(url)
+
+    def getMethod(self, url):
         response = self.getResponse(url)
         # Uhh this will have a reference to this object, maybe track
         # that somehow?
