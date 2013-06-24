@@ -18,10 +18,10 @@ the update method before it can be used::
     >>> result = client.updateDashboard()
     >>> result = client.getDashboard()
     >>> sorted(result['workspace-home'].items())
-    [(u'label', u'List personal workspaces'),
+    [(u'label', u'Workspace home'),
     (u'target', u'http://nohost/plone/pmr2-dashboard/workspace-home')]
     >>> sorted(result['workspace-add'].items())
-    [(u'label', u'Create personal workspace'),
+    [(u'label', u'Create workspace in workspace home'),
     (u'target', u'http://nohost/plone/pmr2-dashboard/workspace-add')]
 
 The helper method ``getDashboardMethod`` on one of the keys will
