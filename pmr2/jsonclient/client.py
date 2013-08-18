@@ -44,6 +44,8 @@ class PMR2Client(object):
         if headers is None:
             headers = {}
         request = urllib2.Request(url, data=data, headers=headers)
+        # Ensure this is always the case.
+        request.add_header('Content-Type', _protocol)
 
         if self.credential:
             self.credential.apply(request)
@@ -66,18 +68,20 @@ class PMR2Client(object):
             new_request = self.buildRequest(e.url)
             return self.open(new_request, trail)
 
-    def getResponse(self, url, data=None):
-        request = self.buildRequest(url, data)
+    def getResponse(self, url, data=None, headers=None):
+        request = self.buildRequest(url, data, headers)
         fp = self.open(request)
         self.lasturl = fp.geturl()
 
-        if fp.headers.get('Content-Type') != _protocol:
-            # some kind of error?
-            self.mismatched_content = fp.read()
-            fp.close()
-            raise ValueError('Content-Type mismatch')
+        try:
+            result = json.load(fp)
+        except:
+            if fp.headers.get('Content-Type') != _protocol:
+                # some kind of error?
+                self.mismatched_content = fp.read()
+                fp.close()
+                raise ValueError('Content-Type mismatch')
 
-        result = json.load(fp)
         fp.close()
         return result
 

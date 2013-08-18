@@ -160,7 +160,7 @@ class PMR2Cli(object):
         Open a target URL to receive raw API output.
         """
 
-        print self.client.getResponse(''.join(a))
+        print self.client.getResponse(*a)
 
     def do_property(self, *a):
         """
