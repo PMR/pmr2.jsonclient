@@ -72,17 +72,17 @@ class PMR2Client(object):
         request = self.buildRequest(url, data, headers)
         fp = self.open(request)
         self.lasturl = fp.geturl()
+        contents = fp.read()
+        fp.close()
 
         try:
-            result = json.load(fp)
-        except:
+            result = json.loads(contents)
+        except ValueError:
             if fp.headers.get('Content-Type') != _protocol:
                 # some kind of error?
-                self.mismatched_content = fp.read()
-                fp.close()
+                self.mismatched_content = contents
                 raise ValueError('Content-Type mismatch')
 
-        fp.close()
         return result
 
     def setSite(self, site):
