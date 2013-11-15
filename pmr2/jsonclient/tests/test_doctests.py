@@ -8,10 +8,16 @@ from Products.PloneTestCase import PloneTestCase as ptc
 from Products.PloneTestCase.layer import PloneSite
 from Products.PloneTestCase.layer import onsetup
 
-from pmr2.jsonclient.tests import base
-
+INTEGRATION_TEST = True
+try:
+    from pmr2.jsonclient.tests import base
+except ImportError:
+    INTEGRATION_TEST = False
 
 def test_suite():
+    if not INTEGRATION_TEST:
+        return unittest.TestSuite([])
+
     return unittest.TestSuite([
 
         ztc.ZopeDocFileSuite(

@@ -59,7 +59,7 @@ class PMR2Client(object):
 
         try:
             return self._opener.open(request)
-        except urllib2.HTTPError, e:
+        except urllib2.HTTPError as e:
             if e.url == url or url in trail:
                 raise
             trail.append(url)
