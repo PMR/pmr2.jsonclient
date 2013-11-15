@@ -8,7 +8,7 @@ import readline
 import traceback
 import webbrowser
 
-from pmr2.jsonclient import PMR2Client, OAuthCredential
+from pmr2.jsonclient import Client, OAuthCredential
 
 # There are no settings for these.  Manually fill this out here with the
 # consumer key and secret registered for this at the target PMR2ROOT.
@@ -26,7 +26,7 @@ HOME = os.path.expanduser('~')
 CONFIG_FILENAME = os.path.join(HOME, '.pmr2clirc')
 
 
-class PMR2Cli(object):
+class Cli(object):
 
     token_key = ''
     token_secret = ''
@@ -42,7 +42,7 @@ class PMR2Cli(object):
 
         self.credential = OAuthCredential(
             client=(consumer_key, consumer_secret))
-        self.client = PMR2Client(pmr2root)
+        self.client = Client(pmr2root)
         self.client.setCredential(self.credential)
 
     @property
@@ -215,7 +215,7 @@ class PMR2Cli(object):
     def run(self):
         self.load_config()
 
-        client = PMR2Client(PMR2ROOT)
+        client = Client(PMR2ROOT)
         access = False
         if not self.credential.hasAccess():
             try:
@@ -249,5 +249,5 @@ class PMR2Cli(object):
 
 
 if __name__ == '__main__':
-    cli = PMR2Cli()
+    cli = Cli()
     cli.run()

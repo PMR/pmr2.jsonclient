@@ -5,8 +5,8 @@ To begin accessing PMR2 using a web client, start by instantiating the
 main client object::
 
     >>> from pmr2.jsonclient import credential
-    >>> from pmr2.jsonclient import PMR2Client
-    >>> client = PMR2Client(self.portal.absolute_url())
+    >>> from pmr2.jsonclient import Client
+    >>> client = Client(self.portal.absolute_url())
 
 Dashboard
 ---------
@@ -193,11 +193,11 @@ temporary credential::
     >>> (cred.key, cred.secret) == (None, None)
     True
 
-Try this again after this credential object is set to a PMR2Client
+Try this again after this credential object is set to a Client
 object.  Also supply a callback, for we are testing this as an stand-
 alone application, it will be set to ``oob``::
 
-    >>> client = PMR2Client(self.portal.absolute_url())
+    >>> client = Client(self.portal.absolute_url())
     >>> client.setCredential(cred)
     >>> cred.getTemporaryCredential(callback='oob')
     >>> (cred.key, cred.secret) == (None, None)

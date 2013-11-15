@@ -31,7 +31,7 @@ class Credential(object):
         if auth:
             request.add_header('Authorization', auth)
 
-    def setPMR2Client(self, pmr2_client):
+    def setClient(self, pmr2_client):
         self.pmr2_client = pmr2_client
 
     def hasAccess(self):

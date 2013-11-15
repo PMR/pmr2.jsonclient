@@ -30,12 +30,12 @@ from pmr2.app.interfaces import IPMR2AppLayer
 from pmr2.oauth.tests import base  # trigger onsetup
 from pmr2.json.tests import base  # trigger onsetup
 
-from pmr2.jsonclient.client import PMR2Client, build_opener
+from pmr2.jsonclient.client import Client, build_opener
 
 @onsetup
 def setup():
     # Inject the test opener.
-    PMR2Client._opener = build_opener(PublisherHTTPHandler)
+    Client._opener = build_opener(PublisherHTTPHandler)
 
 @onteardown
 def teardown():

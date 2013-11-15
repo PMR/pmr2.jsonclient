@@ -3,21 +3,21 @@ import urllib2
 
 import oauthlib
 
-_protocol = 'application/vnd.physiome.pmr2.json.0'
-_ua = 'PMR2Client/0.1'
+_PROTOCOL = 'application/vnd.physiome.pmr2.json.0'
+_UA = 'pmr2.jsonclient.client.Client/0.1'
 
 
 def build_opener(*handlers):
     result = urllib2.build_opener(*handlers)
     result.addheaders = [
-        ('Accept', _protocol),
-        ('Content-Type', _protocol),
-        ('User-Agent', _ua),
+        ('Accept', _PROTOCOL),
+        ('Content-Type', _PROTOCOL),
+        ('User-Agent', _UA),
     ]
     return result
 
 
-class PMR2Client(object):
+class Client(object):
 
     _opener = build_opener()
 
@@ -45,7 +45,7 @@ class PMR2Client(object):
             headers = {}
         request = urllib2.Request(url, data=data, headers=headers)
         # Ensure this is always the case.
-        request.add_header('Content-Type', _protocol)
+        request.add_header('Content-Type', _PROTOCOL)
 
         if self.credential:
             self.credential.apply(request)
@@ -78,7 +78,7 @@ class PMR2Client(object):
         try:
             result = json.loads(contents)
         except ValueError:
-            if fp.headers.get('Content-Type') != _protocol:
+            if fp.headers.get('Content-Type') != _PROTOCOL:
                 # some kind of error?
                 self.mismatched_content = contents
                 raise ValueError('Content-Type mismatch')
@@ -93,7 +93,7 @@ class PMR2Client(object):
         # XXX figure out some way to do the update smartly, such as test
         # whether the credentials are ready to be used.
         self.credential = credential
-        self.credential.setPMR2Client(self)
+        self.credential.setClient(self)
         if update:
             self.updateDashboard()
 
@@ -117,10 +117,10 @@ class PMR2Client(object):
         response = self.getResponse(url)
         # Uhh this will have a reference to this object, maybe track
         # that somehow?
-        return PMR2Method(self, self.lasturl, response)
+        return Method(self, self.lasturl, response)
 
 
-class PMR2Method(object):
+class Method(object):
 
     def __init__(self, context, url, obj):
         self.context = context
