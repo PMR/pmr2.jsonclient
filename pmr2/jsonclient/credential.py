@@ -1,12 +1,12 @@
-import urlparse
+from urllib.parse import parse_qs
 
 from oauthlib.oauth1 import Client
 
 
 def safe_unicode(s):
     # workaround for unicode requirements
-    if isinstance(s, str):
-        return unicode(s)
+    if isinstance(s, bytes):
+        return str(s, encoding='utf8')
     return s
 
 
@@ -121,9 +121,9 @@ class OAuthCredential(Credential):
 
         request = self.pmr2_client.buildRequest(url)
         fp = self.pmr2_client.open(request)
-        rawstr = fp.read()
+        rawstr = str(fp.read(), encoding='utf8')
         fp.close()
-        d = urlparse.parse_qs(rawstr)
+        d = parse_qs(rawstr)
         self.key = d.get('oauth_token', ['']).pop()
         self.secret = d.get('oauth_token_secret', ['']).pop()
 
@@ -144,7 +144,7 @@ class OAuthCredential(Credential):
         fp = self.pmr2_client.open(request)
         rawstr = fp.read()
         fp.close()
-        d = urlparse.parse_qs(rawstr)
+        d = parse_qs(rawstr)
         self.key = d.get('oauth_token', ['']).pop()
         self.secret = d.get('oauth_token_secret', ['']).pop()
         # do NOT include a verifier with a normal acces request as this

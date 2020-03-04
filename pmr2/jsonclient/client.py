@@ -1,5 +1,8 @@
 import json
-import urllib2
+# import urllib2
+from urllib.request import build_opener
+from urllib.request import Request
+from urllib.error import HTTPError
 
 import oauthlib
 
@@ -7,8 +10,8 @@ _PROTOCOL = 'application/vnd.physiome.pmr2.json.0'
 _UA = 'pmr2.jsonclient.client.Client/0.1'
 
 
-def build_opener(*handlers):
-    result = urllib2.build_opener(*handlers)
+def _build_opener(*handlers):
+    result = build_opener(*handlers)
     result.addheaders = [
         ('Accept', _PROTOCOL),
         ('Content-Type', _PROTOCOL),
@@ -19,7 +22,7 @@ def build_opener(*handlers):
 
 class Client(object):
 
-    _opener = build_opener()
+    _opener = _build_opener()
 
     site = None
     _auth = None
@@ -38,12 +41,12 @@ class Client(object):
     
     def buildRequest(self, url, data=None, headers=None):
 
-        if data and not isinstance(data, basestring):
+        if data and not isinstance(data, str):
             data = json.dumps(data)
 
         if headers is None:
             headers = {}
-        request = urllib2.Request(url, data=data, headers=headers)
+        request = Request(url, data=data, headers=headers)
         # Ensure this is always the case.
         request.add_header('Content-Type', _PROTOCOL)
 
@@ -59,7 +62,7 @@ class Client(object):
 
         try:
             return self._opener.open(request)
-        except urllib2.HTTPError as e:
+        except HTTPError as e:
             if e.url == url or url in trail:
                 raise
             trail.append(url)
@@ -109,8 +112,7 @@ class Client(object):
 
     def getDashboardMethod(self, name):
         action = self.dashboard[name]
-        # Can't have unicode.
-        url = str(action['target'])
+        url = action['target']
         return self.getMethod(url)
 
     def getMethod(self, url):
